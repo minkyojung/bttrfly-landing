@@ -372,7 +372,7 @@ function BackLight({
 // 실제 물리법칙 기반 고무줄 효과 컴포넌트
 function RubberBand({ 
   cardRef,
-  cardWidth,
+  cardWidth: _cardWidth,
   cardHeight 
 }: { 
   cardRef: React.RefObject<THREE.Group>

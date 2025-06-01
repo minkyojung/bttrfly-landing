@@ -4,7 +4,6 @@ import { Canvas, useFrame, useLoader } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { useRef, useMemo, useState, useEffect } from 'react'
 import * as THREE from 'three'
-import { marked } from 'marked'
 
 interface ThreeCardProps {
   radius?: number
@@ -278,9 +277,8 @@ function MacOSButtons({
   
   return (
     <>
-      {buttonPositions.map((button, index) => (
+      {buttonPositions.map((button, _index) => (
         <group key={button.name}>
-          {/* 플랫한 단색 macOS 버튼 */}
           <mesh 
             position={[button.x, startY, buttonZ]}
             rotation={[Math.PI / 2, 0, 0]}
@@ -290,7 +288,6 @@ function MacOSButtons({
             <meshBasicMaterial
               color={button.color}
               depthTest={false}
-              // 완전한 단색 - 하이라이트나 효과 없음
             />
           </mesh>
         </group>
@@ -334,8 +331,8 @@ function MarkdownContent({
 
 // 카드 뒷면 이미지 컴포넌트
 function BackfaceImage({ 
-  cardWidth, 
-  cardHeight 
+  cardWidth: _cardWidth, 
+  cardHeight: _cardHeight 
 }: { 
   cardWidth: number
   cardHeight: number
@@ -349,7 +346,7 @@ function BackfaceImage({
       rotation={[0, Math.PI, 0]} // 뒷면이므로 180도 회전
       renderOrder={1.5}
     >
-      <planeGeometry args={[cardWidth * 0.3, cardHeight * 0.2]} />
+      <planeGeometry args={[_cardWidth * 0.3, _cardHeight * 0.2]} />
       <meshBasicMaterial
         map={texture}
         transparent={true}
@@ -361,8 +358,8 @@ function BackfaceImage({
 
 // 카드 뒤쪽 실제 백라이트 광원 컴포넌트
 function BackLight({ 
-  cardWidth, 
-  cardHeight 
+  cardWidth: _cardWidth, 
+  cardHeight: _cardHeight 
 }: { 
   cardWidth: number
   cardHeight: number
@@ -397,7 +394,7 @@ function BackLight({
 // 실제 물리법칙 기반 고무줄 효과 컴포넌트
 function RubberBand({ 
   cardRef,
-  cardWidth,
+  cardWidth: _cardWidth,
   cardHeight 
 }: { 
   cardRef: React.RefObject<THREE.Group>
@@ -651,7 +648,7 @@ function FloatingCard({
   )
   
   // 부드러운 회전 애니메이션
-  useFrame((state) => {
+  useFrame((_state) => {
     if (cardRef.current) {
       cardRef.current.rotation.y += 0.005
       // Y축 부유 애니메이션 제거 (고무줄과 충돌 방지)
@@ -820,7 +817,7 @@ function MinimalWaitlist() {
         ) : (
           <div className="flex items-center justify-center gap-2 py-1">
             <span className="text-white text-lg">✓</span>
-            <span className="text-white text-sm font-medium">You're on the waitlist!</span>
+            <span className="text-white text-sm font-medium">You&apos;re on the waitlist!</span>
           </div>
         )}
       </div>
