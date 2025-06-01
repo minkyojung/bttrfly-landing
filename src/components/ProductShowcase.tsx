@@ -4,7 +4,6 @@ import { Canvas, useFrame, useLoader } from '@react-three/fiber'
 import { OrbitControls } from '@react-three/drei'
 import { useRef, useMemo, useState, useEffect } from 'react'
 import * as THREE from 'three'
-import { marked } from 'marked'
 
 // 기존 ThreeCard의 모든 컴포넌트들을 여기로 이동
 // (createMarkdownTexture, MacOSButtons, MarkdownContent, BackfaceImage, BackLight, RubberBand 등)
@@ -261,7 +260,7 @@ function MacOSButtons({
   
   return (
     <>
-      {buttonPositions.map((button, index) => (
+      {buttonPositions.map((button, _index) => (
         <group key={button.name}>
           <mesh 
             position={[button.x, startY, buttonZ]}
@@ -314,8 +313,8 @@ function MarkdownContent({
 
 // 카드 뒷면 이미지 컴포넌트
 function BackfaceImage({ 
-  cardWidth, 
-  cardHeight 
+  cardWidth: _cardWidth, 
+  cardHeight: _cardHeight 
 }: { 
   cardWidth: number
   cardHeight: number
@@ -328,7 +327,7 @@ function BackfaceImage({
       rotation={[0, Math.PI, 0]}
       renderOrder={1.5}
     >
-      <planeGeometry args={[cardWidth * 0.3, cardHeight * 0.2]} />
+      <planeGeometry args={[_cardWidth * 0.3, _cardHeight * 0.2]} />
       <meshBasicMaterial
         map={texture}
         transparent={true}
@@ -340,8 +339,8 @@ function BackfaceImage({
 
 // 카드 뒤쪽 실제 백라이트 광원 컴포넌트
 function BackLight({ 
-  cardWidth, 
-  cardHeight 
+  cardWidth: _cardWidth, 
+  cardHeight: _cardHeight 
 }: { 
   cardWidth: number
   cardHeight: number
@@ -590,7 +589,7 @@ function FloatingCard({
     [width, height, thickness, radius]
   )
   
-  useFrame((state) => {
+  useFrame((_state) => {
     if (cardRef.current) {
       cardRef.current.rotation.y += 0.005
     }
@@ -755,8 +754,8 @@ function RightPanel({ productInfo }: { productInfo: ProductInfo }) {
               Features
             </h3>
             <ul className="space-y-2">
-              {productInfo.features.map((feature, index) => (
-                <li key={index} className="flex items-start gap-2">
+              {productInfo.features.map((feature, _index) => (
+                <li key={_index} className="flex items-start gap-2">
                   <div className="w-1.5 h-1.5 bg-white rounded-full mt-1.5 flex-shrink-0"></div>
                   <span className="text-white/90 text-sm leading-relaxed">{feature}</span>
                 </li>
