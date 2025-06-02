@@ -260,7 +260,7 @@ function MacOSButtons({
   
   return (
     <>
-      {buttonPositions.map((button, _index) => (
+      {buttonPositions.map((button) => (
         <group key={button.name}>
           <mesh 
             position={[button.x, startY, buttonZ]}
@@ -338,13 +338,7 @@ function BackfaceImage({
 }
 
 // 카드 뒤쪽 실제 백라이트 광원 컴포넌트
-function BackLight({ 
-  cardWidth: _cardWidth, 
-  cardHeight: _cardHeight 
-}: { 
-  cardWidth: number
-  cardHeight: number
-}) {
+function BackLight() {
   const backLightRef = useRef<THREE.PointLight>(null!)
   
   useFrame((state) => {
@@ -372,11 +366,9 @@ function BackLight({
 // 실제 물리법칙 기반 고무줄 효과 컴포넌트
 function RubberBand({ 
   cardRef,
-  cardWidth: _cardWidth,
   cardHeight 
 }: { 
   cardRef: React.RefObject<THREE.Group>
-  cardWidth: number
   cardHeight: number
 }) {
   const topBandRef = useRef<THREE.Mesh>(null!)
@@ -439,7 +431,7 @@ function RubberBand({
       window.removeEventListener('mousemove', handleMouseMove)
       window.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [physics.isDragging, physics.dragStartY, physics.springConstant])
+  }, [physics.isDragging, physics.dragStartY, physics.springConstant, physics.position])
   
   useFrame((state, delta) => {
     if (!physics.isDragging && cardRef.current && topBandRef.current && bottomBandRef.current) {
@@ -589,7 +581,7 @@ function FloatingCard({
     [width, height, thickness, radius]
   )
   
-  useFrame((_state) => {
+  useFrame(() => {
     if (cardRef.current) {
       cardRef.current.rotation.y += 0.005
     }
@@ -638,14 +630,10 @@ function FloatingCard({
         cardHeight={height}
       />
       
-      <BackLight 
-        cardWidth={width}
-        cardHeight={height}
-      />
+      <BackLight />
       
       <RubberBand 
         cardRef={cardRef}
-        cardWidth={width}
         cardHeight={height}
       />
     </group>
@@ -817,4 +805,4 @@ export default function ProductShowcase({
       <RightPanel productInfo={productInfo} />
     </div>
   )
-}
+} 
