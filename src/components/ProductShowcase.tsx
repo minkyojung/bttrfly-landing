@@ -700,6 +700,20 @@ function RightPanel({ productInfo }: { productInfo: ProductInfo }) {
     return () => clearTimeout(timer)
   }, [])
   
+  // 다운로드 핸들러 함수 추가
+  const handleDownload = () => {
+    const downloadUrl = 'https://minkyojung.github.io/bttrfly-updates/downloads/Bttrfly_1.0.1_112.dmg';
+    
+    // 새 창에서 다운로드 링크 열기 (일부 브라우저에서 더 안정적)
+    const link = document.createElement('a');
+    link.href = downloadUrl;
+    link.download = 'Bttrfly_1.0.1_112.dmg'; // 다운로드 파일명 지정
+    link.target = '_blank'; // 새 탭에서 열기
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   return (
     <div className="w-1/2 h-full flex items-center justify-center pl-1 pr-8 py-8">
       <div 
@@ -751,8 +765,11 @@ function RightPanel({ productInfo }: { productInfo: ProductInfo }) {
             </ul>
           </div>
           
-          {/* CTA 버튼 */}
-          <button className="w-full bg-white hover:bg-white/90 text-black font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg text-sm">
+          {/* CTA 버튼에 onClick 핸들러 추가 */}
+          <button 
+            onClick={handleDownload}
+            className="w-full bg-white hover:bg-white/90 text-black font-semibold py-3 px-4 rounded-xl transition-all duration-300 hover:scale-105 active:scale-95 shadow-lg text-sm"
+          >
             {productInfo.ctaText}
           </button>
           
