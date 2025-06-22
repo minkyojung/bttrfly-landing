@@ -1,4 +1,3 @@
-import ProductShowcase from "@/components/ProductShowcase";
 import { VirtualMonitor } from "@/components/virtual-monitor/VirtualMonitor";
 
 export default function Home() {

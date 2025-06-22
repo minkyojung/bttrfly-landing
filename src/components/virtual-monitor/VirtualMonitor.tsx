@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge'
 import { Separator } from '@/components/ui/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
 import { cn } from '@/lib/utils'
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, useCallback } from 'react'
 
 // 상태 타입 정의
 type LockState = 'locked' | 'unlocking' | 'unlocked'
@@ -102,7 +102,6 @@ interface WindowState {
 
 interface VirtualMonitorProps {
   className?: string
-  hasNotch?: boolean
   screenBrightness?: number
   margin?: number
 }
@@ -194,7 +193,7 @@ function DraggableWindow({
             </p>
             
             <p className="text-white/80 break-normal" style={{ letterSpacing: '-0.0125em' }}>
-              Download Bttrfly and don't lose your ideas.
+              Download Bttrfly and don&apos;t lose your ideas.
               <br />
               Available for macOS.
               <br />
@@ -232,14 +231,14 @@ function DraggableWindow({
   }
 
   // 모니터 경계 캐싱 및 업데이트
-  const updateMonitorBounds = () => {
+  const updateMonitorBounds = useCallback(() => {
     if (monitorRef.current) {
       monitorBoundsRef.current = monitorRef.current.getBoundingClientRect()
     }
-  }
+  }, [monitorRef])
 
   // 경계 제한 함수 (캐싱된 값 사용)
-  const constrainToMonitor = (x: number, y: number) => {
+  const constrainToMonitor = useCallback((x: number, y: number) => {
     const monitorRect = monitorBoundsRef.current
     if (!monitorRect) return { x, y }
     
@@ -247,7 +246,7 @@ function DraggableWindow({
       x: Math.max(0, Math.min(x, monitorRect.width - windowState.size.width)),
       y: Math.max(0, Math.min(y, monitorRect.height - windowState.size.height))
     }
-  }
+  }, [windowState.size.width, windowState.size.height])
 
   // 드래그 시작 핸들러
   const handleMouseDown = (e: React.MouseEvent) => {
@@ -301,7 +300,7 @@ function DraggableWindow({
       document.removeEventListener('mousemove', handleMouseMove)
       document.removeEventListener('mouseup', handleMouseUp)
     }
-  }, [isDragging, dragOffset])
+  }, [isDragging, dragOffset, constrainToMonitor, setWindowState])
 
   // 최초 윈도우 위치 초기화 (가운데 정렬)
   useEffect(() => {
@@ -322,11 +321,12 @@ function DraggableWindow({
     }))
     
     setHasInitializedPosition(true)
-  }, [windowState.isOpen, hasInitializedPosition])
+  }, [windowState.isOpen, hasInitializedPosition, constrainToMonitor, setWindowState, updateMonitorBounds, windowState.size.width, windowState.size.height, monitorRef])
 
   // 모니터 크기 변경시 경계 캐시만 업데이트 (위치는 유지)
   useEffect(() => {
-    if (!monitorRef.current || !windowState.isOpen) return
+    const currentMonitorRef = monitorRef.current
+    if (!currentMonitorRef || !windowState.isOpen) return
 
     const updateBounds = () => {
       updateMonitorBounds() // 경계 캐시만 업데이트
@@ -334,14 +334,14 @@ function DraggableWindow({
 
     // ResizeObserver 설정
     const resizeObserver = new ResizeObserver(updateBounds)
-    resizeObserver.observe(monitorRef.current)
+    resizeObserver.observe(currentMonitorRef)
 
     return () => {
-      if (monitorRef.current) {
-        resizeObserver.unobserve(monitorRef.current)
+      if (currentMonitorRef) {
+        resizeObserver.unobserve(currentMonitorRef)
       }
     }
-  }, [windowState.isOpen])
+  }, [windowState.isOpen, updateMonitorBounds, monitorRef])
 
   if (!windowState.isOpen) return null
   
@@ -454,13 +454,11 @@ function DraggableWindow({
 
 export function VirtualMonitor({
   className,
-  hasNotch = true,
   screenBrightness = 1,
   margin = 20
 }: VirtualMonitorProps) {
   // 상태 관리
   const [lockState, setLockState] = useState<LockState>('locked')
-  const [currentTime, setCurrentTime] = useState(new Date())
   const [isWindowJustOpened, setIsWindowJustOpened] = useState(false)
   const [showUI, setShowUI] = useState(false) // UI 애니메이션 제어용 별도 상태
   const [greetingState, setGreetingState] = useState<'none' | 'dots' | 'typing' | 'backspacing'>('none') // 통합된 인사말 상태
@@ -508,13 +506,7 @@ export function VirtualMonitor({
     }
   }, [])
 
-  // 시간 업데이트
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentTime(new Date())
-    }, 1000)
-    return () => clearInterval(timer)
-  }, [])
+  // formatTime 함수 제거 - 사용되지 않음
 
   // 잠금 해제 후 노트창 열기
   useEffect(() => {
@@ -597,15 +589,7 @@ export function VirtualMonitor({
     }
   }, [greetingState, greetingMessage])
 
-  const formatTime = (date: Date) => {
-    return date.toLocaleTimeString('ko-KR', {
-      weekday: 'short',
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    })
-  }
+
 
   const handleUnlock = async () => {
     if (lockState !== 'locked') return // 중복 실행 방지
@@ -687,7 +671,7 @@ export function VirtualMonitor({
                 }}
               >
                 <div className="text-center text-white mt-16">
-                  <h1 className="text-[60pt] font-bold tracking-[-0.04em]">Ideas don't queue</h1>
+                  <h1 className="text-[60pt] font-bold tracking-[-0.04em]">Ideas don&apos;t queue</h1>
                   <p className="text-[22pt] font-semibold tracking-[-0.02em]">Always-on-top, keep the flow</p>
                 </div>
                 <div className="mt-auto mb-28">
@@ -720,7 +704,7 @@ export function VirtualMonitor({
                             size="sm"
                             className="h-6 w-6 p-0 text-white hover:bg-white/10"
                           >
-                            <img src="/icon-light.svg" alt="Bttrfly" className="w-4 h-4" />
+                            <span className="text-white text-sm">🦋</span>
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>

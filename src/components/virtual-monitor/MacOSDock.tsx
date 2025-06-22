@@ -12,7 +12,7 @@ const dockApps = [
   { name: 'Finder', icon: '📁', isRunning: true },
   { name: 'Safari', icon: '🌐', isRunning: false },
   { name: 'Mail', icon: '📧', isRunning: false, badge: '3' },
-  { name: 'Bttrfly', icon: 'icon-light.svg', isRunning: true },
+  { name: 'Bttrfly', icon: '🦋', isRunning: true },
   { name: 'Terminal', icon: '⚫', isRunning: false },
   { name: 'System Preferences', icon: '⚙️', isRunning: false },
   { name: 'App Store', icon: '🏪', isRunning: false },
@@ -34,11 +34,7 @@ export function MacOSDock({ onOpenApp }: MacOSDockProps) {
                       className="w-12 h-12 p-0 rounded-xl hover:scale-110 transition-transform duration-200 ease-out bg-white/10 hover:bg-white/20"
                       onClick={() => onOpenApp(app.name)}
                     >
-                      {typeof app.icon === 'string' && app.icon.endsWith('.svg') ? (
-                        <img src={app.icon} alt={app.name} className="w-6 h-6" />
-                      ) : (
-                        <span className="text-2xl">{app.icon}</span>
-                      )}
+                      <span className="text-2xl">{app.name === 'Bttrfly' ? '🦋' : app.icon}</span>
                     </Button>
                     
                     {/* 실행 중인 앱 표시 */}
