@@ -1,11 +1,12 @@
 'use client'
 
-import { Button } from '@/components/ui/button'
-import { Badge } from '@/components/ui/badge'
-import { Separator } from '@/components/ui/separator'
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip'
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { cn } from '@/lib/utils'
 import { useState, useEffect, useRef, useCallback } from 'react'
+import Image from 'next/image'
+import { MacOSMenuBar } from './MacOSMenuBar'
+import { MacOSDock } from './MacOSDock'
 
 // 상태 타입 정의
 type LockState = 'locked' | 'unlocking' | 'unlocked'
@@ -106,7 +107,7 @@ interface VirtualMonitorProps {
   margin?: number
 }
 
-// 드래그 가능한 윈도우 컴포넌트 (추후 구현)
+// 드래그 가능한 윈도우 컴포넌트 (기존 소개창)
 function DraggableWindow({ 
   windowState, 
   isJustOpened, 
@@ -121,91 +122,44 @@ function DraggableWindow({
   const [isDragging, setIsDragging] = useState(false)
   const [dragOffset, setDragOffset] = useState({ x: 0, y: 0 })
   const [hasInitializedPosition, setHasInitializedPosition] = useState(false)
+  const [textareaValue, setTextareaValue] = useState('')
   const windowRef = useRef<HTMLDivElement | null>(null)
   const monitorBoundsRef = useRef<DOMRect | null>(null)
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null)
   
   // position은 windowState에서 직접 사용 (이중 상태 제거)
 
-  // 스크린 콘텐츠 정의
+  // 노트창 콘텐츠 정의 (단일 페이지)
   const screens: ScreenContent[] = [
     {
-      id: 'intro',
-      title: 'Bttrfly',
+      id: 'note',
+      title: 'Bttrfly Note',
       content: (
-        <div className="h-full w-full overflow-y-auto overflow-x-visible">
-          <div className="p-5 space-y-1 text-[12pt] leading-relaxed w-full overflow-y-auto overflow-x-visible break-words tracking-tighter">
-            <p className="text-white/80 text-[15pt] font-bold break-normal tracking-tight">
-            Bttrfly, Markdown note-taking app
-            </p>
-            
-            <p className="text-white/80 break-normal" style={{ letterSpacing: '-0.0125em' }}>
-              Forget the complexity and bloat.
-              <br />
-              When inspiration hits, a blank page is enough.
-              <br />
-              Everything else—AI, fancy organizing—can wait.
-              <br />
-            </p>
-            
-            <p className="text-white/90 font-medium break-normal" style={{ letterSpacing: '-0.0125em' }}>
-              <br />
-              Simple. Essential. Yours.
-            </p>
-          </div>
-        </div>
-      )
-    },
-    {
-      id: 'features',
-      title: 'Features',
-      content: (
-        <div className="h-full w-full overflow-y-auto overflow-x-visible">
-          <div className="p-5 space-y-1 text-[12pt] leading-relaxed w-full overflow-y-auto overflow-x-visible break-words tracking-tighter">
-            <p className="text-white/80 text-[15pt] font-bold break-normal tracking-tight">
-            Key Features
-            </p>
-            
-            <p className="text-white/80 break-normal font-semibold" style={{ letterSpacing: '-0.0125em' }}>
-              ✨ Always on top
-              <br />
-              🎯 Quick note taking
-              <br />
-              🔄 Seamless workflow with hotkeys
-              <br />
-            </p>
-            
-            <p className="text-white/90 font-medium break-normal" style={{ letterSpacing: '-0.0125em' }}>
-              <br />
-              Built for productivity.
-            </p>
-          </div>
-        </div>
-      )
-    },
-    {
-      id: 'download',
-      title: 'Get Started',
-      content: (
-        <div className="h-full w-full overflow-y-auto overflow-x-visible">
-          <div className="p-5 space-y-1 text-[12pt] leading-relaxed w-full overflow-y-auto overflow-x-visible break-words tracking-tighter">
-            <p className="text-white/80 text-[15pt] font-bold break-normal tracking-tight">
-            Ready to Start?
-            </p>
-            
-            <p className="text-white/80 break-normal" style={{ letterSpacing: '-0.0125em' }}>
-              Download Bttrfly and don&apos;t lose your ideas.
-              <br />
-              Available for macOS.
-              <br />
-              Free to use, no signup required.
-              <br />
-            </p>
-            
-            <p className="text-white/90 font-medium break-normal" style={{ letterSpacing: '-0.0125em' }}>
-              <br />
-              
-            </p>
-          </div>
+        <div className="h-full w-full p-4 overflow-hidden relative">
+          {/* 가짜 placeholder */}
+          {!textareaValue && (
+            <div 
+              className="absolute inset-4 text-white/50 text-sm leading-relaxed whitespace-pre-line select-none cursor-text"
+              style={{ fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+              onClick={() => textareaRef.current?.focus()}
+            >
+              {`• Uses local .md files
+              • Always stays on top
+              • Drag to move anywhere
+              • Auto-saves instantly
+              • Perfect for quick notes
+
+Start typing your note...`}
+            </div>
+          )}
+          
+          <textarea
+            ref={textareaRef}
+            className="w-full h-full bg-transparent text-white border-none outline-none resize-none text-sm leading-relaxed relative z-10"
+            style={{ fontFamily: 'Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif' }}
+            value={textareaValue}
+            onChange={(e) => setTextareaValue(e.target.value)}
+          />
         </div>
       )
     }
@@ -302,9 +256,9 @@ function DraggableWindow({
     }
   }, [isDragging, dragOffset, constrainToMonitor, setWindowState])
 
-  // 최초 윈도우 위치 초기화 (가운데 정렬)
+  // 윈도우 위치 초기화 (가운데 정렬) - 창이 열릴 때마다 실행
   useEffect(() => {
-    if (!monitorRef.current || !windowState.isOpen || hasInitializedPosition) return
+    if (!monitorRef.current || !windowState.isOpen) return
 
     updateMonitorBounds()
     const monitorRect = monitorBoundsRef.current
@@ -321,7 +275,24 @@ function DraggableWindow({
     }))
     
     setHasInitializedPosition(true)
-  }, [windowState.isOpen, hasInitializedPosition, constrainToMonitor, setWindowState, updateMonitorBounds, windowState.size.width, windowState.size.height, monitorRef])
+  }, [windowState.isOpen, constrainToMonitor, setWindowState, updateMonitorBounds, windowState.size.width, windowState.size.height, monitorRef])
+
+  // 창이 닫힐 때 초기화 상태 리셋
+  useEffect(() => {
+    if (!windowState.isOpen) {
+      setHasInitializedPosition(false)
+    }
+  }, [windowState.isOpen])
+
+  // 창이 열릴 때 textarea에 자동 포커스
+  useEffect(() => {
+    if (windowState.isOpen && textareaRef.current && !isJustOpened) {
+      // 창 애니메이션이 완료된 후 포커스
+      setTimeout(() => {
+        textareaRef.current?.focus()
+      }, 600) // 창 등장 애니메이션 시간과 맞춤
+    }
+  }, [windowState.isOpen, isJustOpened])
 
   // 모니터 크기 변경시 경계 캐시만 업데이트 (위치는 유지)
   useEffect(() => {
@@ -371,9 +342,9 @@ function DraggableWindow({
       <div 
         className="absolute inset-0 overflow-hidden" 
         style={{
-          backgroundColor: 'rgba(0, 0, 0, 0.6)',
-          backdropFilter: 'blur(50px) saturate(180%)',
-          WebkitBackdropFilter: 'blur(50px) saturate(180%)'
+          backgroundColor: 'rgba(20, 22, 26, 0.8)',
+          backdropFilter: 'blur(40px) saturate(165%)',
+          WebkitBackdropFilter: 'blur(40px) saturate(165%)'
         }}
       />
       
@@ -381,13 +352,16 @@ function DraggableWindow({
       <div className="relative h-full flex flex-col overflow-hidden">
         {/* 노트창 헤더 */}
         <div 
-          className={`h-8 flex items-center justify-between px-4 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}
+          className="h-8 flex items-center justify-between px-4"
           onMouseDown={handleMouseDown}
         >
           <div className="flex items-center space-x-2">
-            <div className="w-3 h-3 rounded-full bg-[#FF5F57] hover:bg-[#FF5F57]/80 transition-colors"></div>
-            <div className="w-3 h-3 rounded-full bg-[#FEBC2E] hover:bg-[#FEBC2E]/80 transition-colors"></div>
-            <div className="w-3 h-3 rounded-full bg-[#28C840] hover:bg-[#28C840]/80 transition-colors"></div>
+            <div 
+              className="w-3 h-3 rounded-full bg-[#FF5F57] hover:bg-[#FF5F57]/80 transition-colors cursor-pointer"
+              onClick={() => setWindowState(prev => ({ ...prev, isOpen: false }))}
+            ></div>
+            <div className="w-3 h-3 rounded-full border border-white/15 hover:bg-white/10 transition-colors"></div>
+            <div className="w-3 h-3 rounded-full border border-white/15 hover:bg-white/10 transition-colors"></div>
           </div>
           <span className="text-xs font-medium text-white/60 absolute left-1/2 transform -translate-x-1/2 pointer-events-none">
             {screens[windowState.currentScreenIndex].title}
@@ -417,35 +391,7 @@ function DraggableWindow({
             ))}
           </div>
 
-          {/* 네비게이션 컨트롤 */}
-          <div className="absolute bottom-6 left-0 right-0 flex justify-between items-center px-6">
-            <button
-              onClick={() => navigateScreen('prev')}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white/90 transition-all duration-300 transform hover:scale-110"
-              disabled={windowState.isTransitioning}
-            >
-              ←
-            </button>
-            <div className="flex space-x-3">
-              {screens.map((_, index) => (
-                <div
-                  key={index}
-                  className={`w-[6px] h-[6px] rounded-full transition-all duration-300 ${
-                    index === windowState.currentScreenIndex
-                      ? 'bg-white/90 scale-125'
-                      : 'bg-white/20'
-                  }`}
-                />
-              ))}
-            </div>
-            <button
-              onClick={() => navigateScreen('next')}
-              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 flex items-center justify-center text-white/60 hover:text-white/90 transition-all duration-300 transform hover:scale-110"
-              disabled={windowState.isTransitioning}
-            >
-              →
-            </button>
-          </div>
+
         </div>
       </div>
     </div>
@@ -589,8 +535,6 @@ export function VirtualMonitor({
     }
   }, [greetingState, greetingMessage])
 
-
-
   const handleUnlock = async () => {
     if (lockState !== 'locked') return // 중복 실행 방지
     
@@ -627,6 +571,35 @@ export function VirtualMonitor({
 
   const openApp = (appName: string) => {
     console.log(`Opening ${appName}`)
+    if (appName === 'Bttrfly') {
+      // 이미 창이 열려있으면 포커스만, 아니면 새로 열기
+      if (windowState.isOpen) {
+        // 창이 이미 열려있을 때 - Always on top 효과로 z-index 증가
+        setWindowState(prev => ({
+          ...prev,
+          position: { ...prev.position } // 강제 리렌더링으로 포커스 효과
+        }))
+      } else {
+        // 창이 닫혀있을 때 - 새로 열기
+        setIsWindowJustOpened(true)
+        setWindowState(prev => ({
+          ...prev,
+          isOpen: true,
+          position: { x: 0, y: 0 } // 초기 위치는 DraggableWindow에서 계산
+        }))
+        
+        // 창 등장 애니메이션 완료 후 상태 리셋
+        setTimeout(() => {
+          setIsWindowJustOpened(false)
+        }, 600)
+      }
+    } else if (appName === 'Updates here') {
+      // Substack 링크로 이동
+      window.open('https://bttrflynote.substack.com/', '_blank', 'noopener,noreferrer')
+    } else if (appName === 'Profile') {
+      // X(Twitter) 링크로 이동
+      window.open('https://x.com/imwilliamjung', '_blank', 'noopener,noreferrer')
+    }
   }
 
   return (
@@ -680,192 +653,22 @@ export function VirtualMonitor({
               </div>
             )}
 
-            {/* 메뉴바 - 실제 콘텐츠 크기에 따른 자연스러운 변화 */}
-            <div 
-              className={`absolute top-4 left-1/2 transform -translate-x-1/2 transition-all duration-600 select-none ${
-                showUI
-                  ? 'opacity-100 translate-y-0 pointer-events-auto'
-                  : 'opacity-0 -translate-y-full pointer-events-none'
-              }`}
-              style={{
-                transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
-                transitionDelay: showUI ? '200ms' : '0ms'
-              }}
-            >
-              <div className="bg-black/20 backdrop-blur-md rounded-2xl px-4 py-2 border border-white/20 select-none">
-                <div className="flex items-center space-x-4 h-6">
-                  {/* 왼쪽 아이콘 */}
-                  <div className="flex items-center">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="h-6 w-6 p-0 text-white hover:bg-white/10"
-                          >
-                            <span className="text-white text-sm">🦋</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Bttrfly</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                  
-                  {/* 가운데 인사말 영역 - 부드러운 크기 변화 */}
-                  <div 
-                    className="transition-all duration-600 flex items-center"
-                    style={{
-                      width: greetingState !== 'none' ? 'auto' : '0px',
-                      maxWidth: greetingState !== 'none' ? '300px' : '0px',
-                      overflow: greetingState !== 'none' ? 'visible' : 'hidden',
-                      transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)'
-                    }}
-                  >
-                    <div 
-                      className="flex items-center whitespace-nowrap transition-all duration-600"
-                      style={{
-                        opacity: greetingState !== 'none' ? 1 : 0,
-                        transform: greetingState !== 'none' ? 'translateX(0)' : 'translateX(-20px)',
-                        transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)'
-                      }}
-                    >
-                      {/* 도트 애니메이션 */}
-                      {greetingState === 'dots' && (
-                        <div className="flex items-center px-4 py-2">
-                          <div className="flex space-x-1">
-                            <div className="w-1.5 h-1.5 bg-white/90 rounded-full animate-bounce" style={{ animationDelay: '0ms' }}></div>
-                            <div className="w-1.5 h-1.5 bg-white/90 rounded-full animate-bounce" style={{ animationDelay: '150ms' }}></div>
-                            <div className="w-1.5 h-1.5 bg-white/90 rounded-full animate-bounce" style={{ animationDelay: '300ms' }}></div>
-                          </div>
-                        </div>
-                      )}
-                      
-                      {/* 타이핑/백스페이스 텍스트 */}
-                      {(greetingState === 'typing' || greetingState === 'backspacing') && (
-                        <div className="px-4 flex items-center">
-                          <span className="text-white/95 font-medium text-sm tracking-wide whitespace-nowrap" 
-                            style={{ textShadow: '0 1px 2px rgba(0, 0, 0, 0.1)' }}
-                          >
-                            {typedText}
-                            {(greetingState === 'typing' && typedText.length < greetingMessage.length) && (
-                              <span className="animate-pulse">|</span>
-                            )}
-                            {greetingState === 'backspacing' && typedText.length > 0 && (
-                              <span className="animate-pulse">|</span>
-                            )}
-                          </span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                  
-                  {/* 오른쪽 다운로드 버튼 */}
-                  <div className="flex items-center space-x-3">
-                    <Separator orientation="vertical" className="h-4 bg-white/20" />
-                    
-                    <Button
-                      asChild
-                      variant="ghost"
-                      size="sm"
-                      className="h-6 px-3 text-white/90 hover:bg-white hover:text-black transition-colors font-medium text-xs rounded-full border border-white/20"
-                    >
-                      <a
-                        href="https://minkyojung.github.io/bttrfly-updates/downloads/Bttrfly_1.0.1_115.dmg"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
-                        Download for Mac
-                      </a>
-                    </Button>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* 메뉴바 */}
+            <MacOSMenuBar
+              showUI={showUI}
+              greetingState={greetingState}
+              typedText={typedText}
+              greetingMessage={greetingMessage}
+            />
 
-            {/* 독 시스템 - 항상 렌더링하되 showUI 상태에 따라 애니메이션 제어 */}
-            <div 
-              className={`absolute bottom-4 left-1/2 transform -translate-x-1/2 transition-all duration-800 select-none ${
-                showUI
-                  ? 'opacity-100 translate-y-0 pointer-events-auto'
-                  : 'opacity-0 translate-y-full pointer-events-none'
-              }`}
-              style={{
-                transitionTimingFunction: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)',
-                transitionDelay: showUI ? '200ms' : '0ms'
-              }}
-            >
-              <div className="bg-white/10 backdrop-blur-md rounded-2xl px-3 py-2 border border-white/20 select-none">
-                <div className="flex items-end space-x-1">
-                  {[
-                    { name: 'Finder', icon: '📁', isRunning: true },
-                    { name: 'Safari', icon: '🌐', isRunning: false },
-                    { name: 'Mail', icon: '📧', isRunning: false, badge: '3' },
-                    { name: 'Bttrfly', icon: '🦋', isRunning: true },
-                    { name: 'Terminal', icon: '⚫', isRunning: false },
-                    { name: 'System Preferences', icon: '⚙️', isRunning: false },
-                    { name: 'App Store', icon: '🏪', isRunning: false },
-                  ].map((app) => (
-                    <TooltipProvider key={app.name}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <div className="relative">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="w-12 h-12 p-0 rounded-xl hover:scale-110 transition-transform duration-200 ease-out bg-white/10 hover:bg-white/20"
-                              onClick={() => openApp(app.name)}
-                            >
-                              <span className="text-2xl">{app.icon}</span>
-                            </Button>
-                            
-                            {app.isRunning && (
-                              <div className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-white rounded-full"></div>
-                            )}
-                            
-                            {app.badge && (
-                              <Badge 
-                                variant="destructive"
-                                className="absolute -top-1 -right-1 w-5 h-5 text-xs p-0 flex items-center justify-center"
-                              >
-                                {app.badge}
-                              </Badge>
-                            )}
-                          </div>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{app.name}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  ))}
-                  
-                  <div className="ml-2 pl-2 border-l border-white/20">
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="w-12 h-12 p-0 rounded-xl hover:scale-110 transition-transform duration-200 ease-out bg-white/10 hover:bg-white/20"
-                            onClick={() => openApp('Trash')}
-                          >
-                            <span className="text-2xl">🗑️</span>
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Trash</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  </div>
-                </div>
-              </div>
-            </div>
+            {/* 독 시스템 */}
+            <MacOSDock
+              showUI={showUI}
+              onOpenApp={openApp}
+              bttrflyIsRunning={windowState.isOpen}
+            />
             
-            {/* 드래그 가능한 노트창 */}
+            {/* 드래그 가능한 노트창 (기존 소개창) */}
             <DraggableWindow 
               windowState={windowState} 
               isJustOpened={isWindowJustOpened} 

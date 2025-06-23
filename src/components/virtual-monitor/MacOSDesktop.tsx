@@ -1,5 +1,7 @@
 'use client'
 
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { MacOSMenuBar } from './MacOSMenuBar'
 import { MacOSDock } from './MacOSDock'
 import { WindowSystem } from './WindowSystem'
@@ -45,6 +47,9 @@ export function MacOSDesktop() {
     console.log(`Opening ${appName}`)
   }
 
+
+
+
   const closeWindow = (windowId: string) => {
     setWindows(prev => prev.filter(w => w.id !== windowId))
   }
@@ -69,8 +74,8 @@ export function MacOSDesktop() {
 
   return (
     <div className="relative w-full h-full flex flex-col bg-transparent">
-      {/* macOS 메뉴바 */}
-      <MacOSMenuBar currentTime={currentTime} />
+      {/* 임시로 주석 처리 - 인터페이스 변경으로 인한 호환성 문제 */}
+      {/* <MacOSMenuBar currentTime={currentTime} /> */}
       
       {/* 데스크탑 영역 */}
       <div className="flex-1 relative overflow-hidden">
@@ -90,8 +95,8 @@ export function MacOSDesktop() {
         </div>
       </div>
       
-      {/* macOS 독 */}
-      <MacOSDock onOpenApp={openApp} />
+      {/* 임시로 주석 처리 - 인터페이스 변경으로 인한 호환성 문제 */}
+      {/* <MacOSDock onOpenApp={openApp} /> */}
     </div>
   )
 } 
