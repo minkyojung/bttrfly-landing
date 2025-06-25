@@ -117,7 +117,7 @@ export function MacOSMenuBar({
               className="h-6 px-3 text-white/90 hover:bg-white hover:text-black transition-colors font-medium text-xs rounded-full border border-white/20"
             >
               <a
-                href="https://minkyojung.github.io/bttrfly-updates/downloads/Bttrfly_1.0.1_117.dmg"
+                href="https://minkyojung.github.io/bttrfly-updates/downloads/Bttrfly_1.0.1_119.dmg"
                 target="_blank"
                 rel="noopener noreferrer"
               >
